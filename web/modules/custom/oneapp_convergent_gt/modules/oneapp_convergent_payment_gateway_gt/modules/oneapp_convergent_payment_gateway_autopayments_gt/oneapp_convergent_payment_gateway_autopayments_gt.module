@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_convergent_payment_autopayments.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_convergent_payment_gateway_autopayments_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the payment gateway module.
+    case 'help.page.oneapp_convergent_payment_gateway_autopayments':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Contains features for oneapp convergent payment gateway autopayments') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+

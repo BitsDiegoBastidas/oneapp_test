@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_convergent_upgrade_plan_gt.module.
+ */
+
+/**
+ * Implements hook_block_alter().
+ */
+function oneapp_convergent_upgrade_plan_gt_block_alter(array &$definitions) {
+  $definitions['oneapp_convergent_upgrade_plan_v2_0_upgrade_block']['class'] =
+    \Drupal\oneapp_convergent_upgrade_plan_gt\Plugin\Block\v2_0\UpgradeGtBlock::class;
+  $definitions['oneapp_convergent_upgrade_plan_mobile_v2_0_upgrade_block']['class'] =
+    \Drupal\oneapp_convergent_upgrade_plan_gt\Plugin\Block\v2_0\UpgradeMobileGtBlock::class;
+}

@@ -1,0 +1,11 @@
+name: Oneapp Convergent Payment Gateway Invoices GT
+type: module
+description: Modulo Oneapp Convergent GT con la funcion de invoices de payment gateway
+package: "OneApp Convergent GT"
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - oneapp_convergent_payment_gateway
+  - oneapp_mobile_billing
+  - oneapp_convergent_gt
+  - oneapp_convergent_payment_gateway_invoices

@@ -1,0 +1,10 @@
+name: "Oneapp Home Payment Gateway DTH Packets GT"
+type: module
+description: "Payment Gateway DTH Home Packets purchase GT"
+core: '8.x'
+core_version_requirement: ^8 || ^9
+# configure: oneapp.settings.config.home.payment_gateway.packets
+
+package: "OneApp Home"
+dependencies:
+  - oneapp_convergent_payment_gateway

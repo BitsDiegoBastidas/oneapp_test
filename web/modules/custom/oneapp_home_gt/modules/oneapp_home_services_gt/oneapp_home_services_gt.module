@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_home_services_gt.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_home_services_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the oneapp_home_services_gt module.
+    case 'help.page.oneapp_home_services_gt':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Oneapp Home Services cards GT') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_endpoint_alter().
+ */
+function oneapp_home_services_gt_endpoint_alter(array &$definitions) {
+  // Redefine la url del endpoint
+  $definitions['oneapp_mobile_v2_0_client_account_general_info_endpoint']['defaults']['endpoint'] =
+  'https://[endpoint:environment_prefix].api.tigo.com/REST/GetClientAccountGeneralInfoVL1/GT/clients/{id}?searchType={searchType}&documentType={documentType}';
+}

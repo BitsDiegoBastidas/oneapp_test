@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_mobile_premium_gt.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_mobile_premium_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the oneapp_mobile_premium_gt module.
+    case 'help.page.oneapp_mobile_premium_gt':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Caracteristicas adicionales oneapp mobile premium gt') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_block_alter().
+ */
+function oneapp_mobile_premium_gt_block_alter(array &$definitions) {
+  // Redefine la clase del bloque
+  $definitions['oneapp_mobile_premium_v2_0_premium_detail_block']['class'] =
+  'Drupal\oneapp_mobile_premium_gt\Plugin\Block\v2_0\PremiumDetailBlockGt';
+}
+
+/**
+ * Implements hook_rest_resource_alter().
+ */
+function oneapp_mobile_premium_gt_rest_resource_alter(&$definitions) {
+  $definitions['oneapp_mobile_premium_product_detail_v2_0_rest_resource']['class'] =
+    'Drupal\oneapp_mobile_premium_gt\Plugin\rest\resource\v2_0\PremiumProductDetailRestResourceGt';
+}

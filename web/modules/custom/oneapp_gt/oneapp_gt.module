@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_gt.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the oneapp_gt module.
+    case 'help.page.oneapp_gt':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Contains features for all oneapp gt') . '</p>';
+      return $output;
+
+    default:
+  }
+}

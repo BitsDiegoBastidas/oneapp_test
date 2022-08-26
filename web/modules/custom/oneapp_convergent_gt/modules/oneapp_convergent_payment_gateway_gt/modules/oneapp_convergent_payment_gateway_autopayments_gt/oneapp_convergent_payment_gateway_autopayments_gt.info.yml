@@ -1,0 +1,8 @@
+name: Oneapp Convergent Payment Gateway AutoPayments GT
+type: module
+description: Modulo Oneapp Convergent con la funcion de realizar autopagos de payment gateway GT
+package: "OneApp Convergent GT"
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - oneapp_convergent_payment_gateway

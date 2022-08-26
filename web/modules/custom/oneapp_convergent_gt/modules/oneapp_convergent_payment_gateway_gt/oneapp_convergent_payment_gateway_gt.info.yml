@@ -1,0 +1,13 @@
+name: Oneapp Convergent Payment Gateway GT
+type: module
+description: Modulo Oneapp Convergente con funcionalidades de pagos con tarjeta de credito con payment gateway GT
+package: "OneApp Convergent GT"
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - oneapp_convergent
+  - aws_service
+  - oneapp
+  - oneapp_rest
+  - oneapp_endpoints
+  - adf_block_config

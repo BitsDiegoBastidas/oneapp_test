@@ -1,0 +1,4 @@
+services:
+  oneapp_convergent_webview_webcomponent_gt.v2_0.component_rest_logic:
+    class: Drupal\oneapp_convergent_webview_webcomponent_gt\Services\v2_0\ComponentRestLogic
+    arguments: ['@adf_simple_auth.common', '@oneapp_convergent_webview_webcomponent.v2_0.component_service', '@oneapp_convergent_accounts.v2_0.accounts', '@oneapp.mobile.utils']

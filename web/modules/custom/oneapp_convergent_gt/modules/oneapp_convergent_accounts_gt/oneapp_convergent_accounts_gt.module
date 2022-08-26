@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_convergent_accounts_gt module.
+ */
+
+/**
+ * Implements hook_endpoint_alter().
+ */
+function oneapp_convergent_accounts_gt_endpoint_alter(array &$definitions) {
+  // Redefine la url del endpoint.
+  $definitions['oneapp_convergent_accounts_v2_0_my_load_accounts_endpoint']['defaults']['endpoint'] =
+    'http://dar-api-qa.tigocloud.net/dar/v4/trusted/users';
+}

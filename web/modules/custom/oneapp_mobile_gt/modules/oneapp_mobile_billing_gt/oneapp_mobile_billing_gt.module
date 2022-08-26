@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * Implements hook_endpoint_alter().
+ */
+function oneapp_mobile_billing_gt_endpoint_alter(array &$definitions) {
+  // Redefine la url del endpoint
+  $definitions['oneapp_mobile_billing_v2_0_sms_details_endpoint']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v2/tigo/mobile/[endpoint:country_iso]/billing/subscribers/{msisdn}/usage/text_message';
+  $definitions['oneapp_mobile_billing_v2_0_call_details_endpoint']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v2/tigo/mobile/[endpoint:country_iso]/billing/subscribers/{msisdn}/usage/voice';
+}
+
+/**
+ * Implements hook_block_alter().
+ */
+function oneapp_mobile_billing_gt_block_alter(array &$definitions) {
+  // Redefine la clase del bloque
+  $definitions['oneapp_mobile_billing_v2_0_call_details_block']['class'] =
+    'Drupal\oneapp_mobile_billing_gt\Plugin\Block\v2_0\CallDetailsGtBlock';
+}

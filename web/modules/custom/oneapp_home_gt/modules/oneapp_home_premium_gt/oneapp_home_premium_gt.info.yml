@@ -1,0 +1,12 @@
+name: Oneapp Home Premium GT
+type: module
+description: Oneapp Home Premium cards
+package: "OneApp Home GT"
+core: 8.x
+core_version_requirement: ^8 || ^9
+version: '8.x-1.0-rc4'
+dependencies:
+  - oneapp:adf_block_config
+  - oneapp:oneapp_rest
+  - oneapp:oneapp_endpoints
+  - oneapp_home:oneapp_home_premium

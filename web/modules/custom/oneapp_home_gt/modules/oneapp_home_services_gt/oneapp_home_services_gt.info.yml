@@ -1,0 +1,9 @@
+name: 'OneApp Home Services GT'
+type: module
+description: 'Oneapp Home Services cards GT'
+package: "OneApp Home GT"
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - oneapp_home
+  - oneapp_home_gt

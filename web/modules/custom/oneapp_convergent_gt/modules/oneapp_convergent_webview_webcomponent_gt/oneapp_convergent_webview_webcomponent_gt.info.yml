@@ -1,0 +1,8 @@
+name: OneApp Convergent Webview Web component GT
+type: module
+description: Modulo OneApp GT Convergente Webview web component con funcionalidades para la configuracion de webviews y web componentes en la app .
+package: "OneApp Convergent"
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - oneapp_convergent

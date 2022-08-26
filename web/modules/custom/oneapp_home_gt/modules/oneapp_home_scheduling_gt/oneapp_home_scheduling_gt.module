@@ -1,0 +1,667 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ *
+ * @param [type] $form
+ * @param FormStateInterface $form_state
+ * @return void
+ */
+function oneapp_home_scheduling_gt_form_oneapp_home_config_alter(&$form,  FormStateInterface $form_state) {
+
+  $config = \Drupal::config('oneapp_home.config')->get('scheduling');
+
+  $form['general']['#weight'] = -1;
+
+  $group = "scheduling";
+
+  $form[$group] = [
+    '#type' => 'details',
+    '#title' => 'Visitas y Reagendamiento',
+    '#group' => 'bootstrap',
+  ];
+
+  $num_status = !empty($form_state->get('num_status'))
+    ? $form_state->get('num_status')
+    : count($config['visit_status']['visit_status_list']);
+  $form_state->set('num_status', $num_status);
+
+  //Estados de visitas.
+  $form[$group]['visit_status'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion para los estados Visita',
+    '#group' => 'scheduling',
+  ];
+  $form[$group]['visit_status']['visit_status_list'] = [
+    '#type' => 'table',
+    '#prefix' => '<div id="status-wrapper">',
+    '#suffix' => '</div>',
+    '#header' => [
+      t('Value'), t('Label'), t('Label Alternativo'), t('Show'), t('class'), t('Weight'),
+    ],
+    '#empty' => t('No hay estados configurados'),
+    '#tabledrag' => [
+      [
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => 'fields-order-weight-fields',
+      ],
+    ],
+  ];
+  $items = $config['visit_status']['visit_status_list'];
+  uasort($items, [
+    'Drupal\Component\Utility\SortArray',
+    'sortByWeightElement',
+  ]);
+  $items = array_values($items);
+  for ($i = 0; $i < $num_status; $i++) {
+    $form[$group]['visit_status']['visit_status_list'][$i]['#attributes']['class'][] = 'draggable';
+    $form[$group]['visit_status']['visit_status_list'][$i]['value'] = [
+      '#type' => 'textfield',
+      '#default_value' => isset($items[$i]['value']) ? $items[$i]['value'] : '',
+      '#size' => 20,
+    ];
+    $form[$group]['visit_status']['visit_status_list'][$i]['label'] = [
+      '#type' => 'textfield',
+      '#default_value' => isset($items[$i]['label']) ? $items[$i]['label'] : '',
+      '#size' => 20,
+    ];
+    $form[$group]['visit_status']['visit_status_list'][$i]['alternative_label'] = [
+      '#type' => 'textfield',
+      '#default_value' => isset($items[$i]['label']) ? $items[$i]['alternative_label'] : '',
+      '#size' => 20,
+    ];
+    $form[$group]['visit_status']['visit_status_list'][$i]['show'] = [
+      '#type' => 'checkbox',
+      '#default_value' => isset($items[$i]['show']) ? $items[$i]['show'] : FALSE,
+      '#size' => 20,
+    ];
+    $form[$group]['visit_status']['visit_status_list'][$i]['class'] = [
+      '#type' => 'textfield',
+      '#default_value' => isset($items[$i]['class']) ? $items[$i]['class'] : '',
+      '#size' => 20,
+    ];
+    $form[$group]['visit_status']['visit_status_list'][$i]['weight'] = [
+      '#type' => 'weight',
+      '#title' => t('Weight status'),
+      '#title_display' => 'invisible',
+      '#default_value' => isset($items[$i]['weight']) ? $items[$i]['weight'] : $i,
+      '#attributes' => ['class' => ['fields-order-weight-fields']],
+    ];
+  }
+  $form[$group]['visit_status']['list_add_row'] = [
+    '#type' => 'submit',
+    '#value' => t('Agregar Estado'),
+    '#submit' => ['addRowStatus'],
+    '#ajax' => [
+      'callback' => 'rowStatusCallback',
+      'wrapper' => 'status-wrapper',
+    ]
+  ];
+  $form[$group]['visit_status']['list_remove_row'] = [
+    '#type' => 'submit',
+    '#value' => t('Remover estado'),
+    '#submit' => ['removeRowStatus'],
+    '#ajax' => [
+      'callback' => 'rowStatusCallback',
+      'wrapper' => 'status-wrapper',
+    ]
+  ];
+  $form[$group]['visit_status']['visit_status_inactive'] = [
+    '#type' => 'textfield',
+    '#title' => t('Clase para el estado inactivo'),
+    '#default_value' => isset($config['visit_status']['visit_status_inactive']) ? $config['visit_status']['visit_status_inactive'] : '',
+  ];
+  $form[$group]['visit_status']['visit_status_active'] = [
+    '#type' => 'textfield',
+    '#title' => t('Clase para el estado activo'),
+    '#default_value' => isset($config['visit_status']['visit_status_active']) ? $config['visit_status']['visit_status_active'] : '',
+  ];
+
+  //Tipo de visitas.
+  $num_visit_type = !empty($form_state->get('num_visit_type')) ? $form_state->get('num_visit_type') : count($config['visit_type_status']['visit_type_status_list']);
+  $form_state->set('num_visit_type', $num_visit_type);
+
+  $form[$group]['visit_type_status'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion para los detalles de la visita',
+    '#group' => 'scheduling',
+  ];
+  $form[$group]['visit_type_status']['visit_type_status_list'] = [
+    '#type' => 'table',
+    '#prefix' => '<div id="visit-type-wrapper">',
+    '#suffix' => '</div>',
+    '#header' => [
+      t('Value'), t('Label'), t('Label Alternativo'), t('Show'), t('Weight'),
+    ],
+    '#empty' => t('No hay tipos de visitas configurados'),
+    '#tabledrag' => [
+      [
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => 'fields-order-weight-fields-1',
+      ],
+    ],
+  ];
+  $types = !empty($config['visit_type_status']['visit_type_status_list']) ? $config['visit_type_status']['visit_type_status_list'] : [];
+  uasort($types, [
+    'Drupal\Component\Utility\SortArray',
+    'sortByWeightElement',
+  ]);
+  $types = array_values($types);
+  for ($i = 0; $i < $num_visit_type; $i++) {
+    $form[$group]['visit_type_status']['visit_type_status_list'][$i]['#attributes']['class'][] = 'draggable';
+    $form[$group]['visit_type_status']['visit_type_status_list'][$i]['value'] = [
+      '#type' => 'textfield',
+      '#default_value' => isset($types[$i]['value']) ? $types[$i]['value'] : '',
+      '#size' => 20,
+    ];
+    $form[$group]['visit_type_status']['visit_type_status_list'][$i]['label'] = [
+      '#type' => 'textfield',
+      '#default_value' => isset($types[$i]['label']) ? $types[$i]['label'] : '',
+      '#size' => 20,
+    ];
+    $form[$group]['visit_type_status']['visit_type_status_list'][$i]['alternative_label'] = [
+      '#type' => 'textfield',
+      '#default_value' => isset($types[$i]['label']) ? $types[$i]['alternative_label'] : '',
+      '#size' => 20,
+    ];
+    $form[$group]['visit_type_status']['visit_type_status_list'][$i]['show'] = [
+      '#type' => 'checkbox',
+      '#default_value' => isset($types[$i]['show']) ? $types[$i]['show'] : FALSE,
+      '#size' => 20,
+    ];
+    $form[$group]['visit_type_status']['visit_type_status_list'][$i]['weight'] = [
+      '#type' => 'weight',
+      '#title' => t('Weight status'),
+      '#title_display' => 'invisible',
+      '#default_value' => isset($types[$i]['weight']) ? $types[$i]['weight'] : $i,
+      '#attributes' => ['class' => ['fields-order-weight-fields-1']],
+    ];
+  }
+
+  $form[$group]['visit_type_status']['list_add_row'] = [
+    '#type' => 'submit',
+    '#value' => t('Agregar tipo de visita'),
+    '#submit' => ['addRowTypeVisit'],
+    '#ajax' => [
+      'callback' => 'rowVisitTypeCallback',
+      'wrapper' => 'visit-type-wrapper',
+    ]
+  ];
+  $form[$group]['visit_type_status']['list_remove_row'] = [
+    '#type' => 'submit',
+    '#value' => t('Remover tipo de visita'),
+    '#submit' => ['removeRowTypeVisit'],
+    '#ajax' => [
+      'callback' => 'rowVisitTypeCallback',
+      'wrapper' => 'visit-type-wrapper',
+    ]
+  ];
+
+  // Confirmar Visita.
+  $form[$group]['confirm_visit'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion para confirmar Visita',
+    '#group' => 'scheduling',
+  ];
+  $form[$group]['confirm_visit']['message_success'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando se confirma la visita exitosamente'),
+    '#default_value' => isset($config['confirm_visit']['message_success']) ? $config['confirm_visit']['message_success'] :
+      'Tu cita ha sido agendada para el día @scheduleDate',
+  ];
+  $form[$group]['confirm_visit']['message_failed'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando falle la confirmacion de la visita'),
+    '#default_value' => isset($config['confirm_visit']['message_failed']) ? $config['confirm_visit']['message_failed'] :
+      'Tu cita no pudo ser agendada',
+  ];
+
+  // Cancelar Visita.
+  $form[$group]['visit_cancel_form'] = [
+    '#type' => 'details',
+    '#title' => 'Cancelar Visita',
+    '#open' => FALSE,
+  ];
+
+  $form[$group]['visit_cancel_form']['label'] = [
+    '#type' => 'textfield',
+    '#title' => t('Etiqueta para consulta de cancelacion'),
+    '#default_value' => isset($config['visit_cancel_form']['label']) ? $config['visit_cancel_form']['label'] : 'Estas seguro que deseas cancelar la visita numero {appointmentId}',
+  ];
+
+  $form[$group]['visit_cancel_form']['class_icon'] = [
+    '#type' => 'textfield',
+    '#title' => t('Clase para icono de consulta de cancelacion'),
+    '#default_value' => isset($config['visit_cancel_form']['class_icon']) ? $config['visit_cancel_form']['class_icon'] : 'warning',
+  ];
+
+  $form[$group]['visit_cancel_form']['success_message'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje de exito para cancelacion exitosa'),
+    '#default_value' => isset($config['visit_cancel_form']['success_message']) ? $config['visit_cancel_form']['success_message'] : 'Cancelacion realizada',
+  ];
+  $form[$group]['visit_cancel_form']['failed_message'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje de error para cancelacion fallida'),
+    '#default_value' => isset($config['visit_cancel_form']['failed_message']) ? $config['visit_cancel_form']['failed_message'] : 'No hemos podido realizar la cancelacion. Por favor intente mas tarde',
+  ];
+
+  //Resetear acciones
+
+  $form[$group]['visit_cancel_form']['reset_action'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Resetear acciones'),
+    '#default_value' => isset($config['visit_cancel_form']['reset_action']) ? $config['visit_cancel_form']['reset_action'] : FALSE,
+  ];
+
+  if ($config['visit_cancel_form']['reset_action']) {
+    $config['visit_cancel_form']['actions'] = [];
+  }
+
+  $actions = isset($config['visit_cancel_form']['actions']) ? $config['visit_cancel_form']['actions'] : [];
+  if (empty($actions) || !is_array($actions)) {
+    $actions = [
+      'confirm' => [
+        'label' => 'Confirmar',
+        'url' => '/api/v2.0/home/appointments/{idType}/{id}/visits/{appointmentId}',
+        'type' => 'button',
+        'show' => TRUE,
+      ],
+      'backVisit' => [
+        'label' => 'Seguir navegando',
+        'url' => '',
+        'type' => 'button',
+        'show' => TRUE,
+      ],
+      'cancel' => [
+        'label' => 'Cancelar',
+        'url' => '',
+        'type' => 'button',
+        'show' => TRUE,
+      ],
+    ];
+  }
+
+  $form[$group]['visit_cancel_form']['actions'] = [
+    '#type' => 'table',
+    '#header' => [
+      'Etiqueta', 'Tipo', 'URL', 'Mostrar',
+    ],
+    '#empty' => t('There are no items yet. Add an item.'),
+  ];
+  foreach ($actions as $id => $action) {
+    $form[$group]['visit_cancel_form']['actions'][$id]['label'] = [
+      '#type' => 'textfield',
+      '#default_value' => $action['label'],
+      '#size' => 10,
+    ];
+    $form[$group]['visit_cancel_form']['actions'][$id]['type'] = [
+      '#type' => 'select',
+      '#options' => [
+        'button' => 'Boton',
+        'link' => 'Link',
+      ],
+      '#default_value' => $action['type'],
+    ];
+    $form[$group]['visit_cancel_form']['actions'][$id]['url'] = [
+      '#type' => 'textfield',
+      '#default_value' => $action['url'],
+      '#maxlength' => 512,
+    ];
+    $form[$group]['visit_cancel_form']['actions'][$id]['show'] = [
+      '#type' => 'checkbox',
+      '#default_value' => $action['show'],
+    ];
+  }
+  $form[$group]['visit_cancel_form']['success']['mail'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Plantilla de correo'),
+    '#open' => TRUE,
+    '#weight' => 0,
+    '#collapsible' => TRUE,
+  ];
+  $form[$group]['visit_cancel_form']['success']['mail']['subject'] = [
+    '#type' => 'textfield',
+    '#title' => t("Asunto"),
+    '#default_value' => isset($config['visit_cancel_form']['success']['mail']['subject']) ?
+      $config['visit_cancel_form']['success']['mail']['subject'] : '',
+    '#maxlength' => 128,
+  ];
+  $form[$group]['visit_cancel_form']['success']['mail']['body'] = [
+    '#type' => 'text_format',
+    '#title' => t('Cuerpo'),
+    '#format' => 'full_html',
+    '#default_value' => isset($config['visit_cancel_form']['success']['mail']['body']['value']) ?
+      $config['visit_cancel_form']['success']['mail']['body']['value'] : '',
+  ];
+
+  // Visita fallida.
+  $form[$group]['visit_failed_form'] = [
+    '#type' => 'details',
+    '#title' => 'Visita Fallida',
+    '#open' => FALSE,
+  ];
+
+  $form[$group]['visit_failed_form']['success']['mail'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Plantilla de correo'),
+    '#open' => TRUE,
+    '#weight' => 0,
+    '#collapsible' => TRUE,
+  ];
+
+  $form[$group]['visit_failed_form']['success']['mail']['subject'] = [
+    '#type' => 'textfield',
+    '#title' => t("Asunto"),
+    '#default_value' => isset($config['visit_failed_form']['success']['mail']['subject']) ?
+      $config['visit_failed_form']['success']['mail']['subject'] : '',
+    '#maxlength' => 128,
+  ];
+  $form[$group]['visit_failed_form']['success']['mail']['body'] = [
+    '#type' => 'text_format',
+    '#title' => t('Cuerpo'),
+    '#format' => 'full_html',
+    '#default_value' => isset($config['visit_failed_form']['success']['mail']['body']['value']) ?
+      $config['visit_failed_form']['success']['mail']['body']['value'] : '',
+  ];
+
+
+  // Listado fechas reagendamiento fallida.
+  $form[$group]['visit_reschedule_date_failed_form'] = [
+    '#type' => 'details',
+    '#title' => 'Listado Fechas Disponibles a Reagendar Fallida',
+    '#open' => FALSE,
+  ];
+
+  $form[$group]['visit_reschedule_date_failed_form']['success']['mail'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Plantilla de correo'),
+    '#open' => TRUE,
+    '#weight' => 0,
+    '#collapsible' => TRUE,
+  ];
+
+  $form[$group]['visit_reschedule_date_failed_form']['success']['mail']['subject'] = [
+    '#type' => 'textfield',
+    '#title' => t("Asunto"),
+    '#default_value' => isset($config['visit_reschedule_date_failed_form']['success']['mail']['subject']) ?
+      $config['visit_reschedule_date_failed_form']['success']['mail']['subject'] : '',
+    '#maxlength' => 128,
+  ];
+  $form[$group]['visit_reschedule_date_failed_form']['success']['mail']['body'] = [
+    '#type' => 'text_format',
+    '#title' => t('Cuerpo'),
+    '#format' => 'full_html',
+    '#default_value' => isset($config['visit_reschedule_date_failed_form']['success']['mail']['body']['value']) ?
+      $config['visit_reschedule_date_failed_form']['success']['mail']['body']['value'] : '',
+  ];
+
+
+  // Agendar visita.
+  $form[$group]['schedule_visit'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion para Agendar Visita',
+    '#group' => 'scheduling',
+  ];
+
+  $form[$group]['schedule_visit']['success'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion Agendamiento exitoso',
+    '#group' => 'schedule_visit',
+  ];
+  $form[$group]['schedule_visit']['success']['icon'] = [
+    '#type' => 'textfield',
+    '#title' => t('Icono cuando se agenda la visita exitosamente'),
+    '#default_value' => isset($config['schedule_visit']['success']['icon']) ? $config['schedule_visit']['success']['icon'] :
+      'success',
+  ];
+  $form[$group]['schedule_visit']['success']['title'] = [
+    '#type' => 'textfield',
+    '#title' => t('Titulo cuando se agenda la visita exitosamente'),
+    '#default_value' => isset($config['schedule_visit']['success']['title']) ? $config['schedule_visit']['success']['title'] :
+      'Tu visita ha sido agendada con exito!',
+  ];
+  $form[$group]['schedule_visit']['success']['message'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando se agenda la visita exitosamente'),
+    '#default_value' => isset($config['schedule_visit']['success']['message']) ? $config['schedule_visit']['success']['message'] :
+      'Hemos enviado un comprobante a: @email',
+  ];
+  $form[$group]['schedule_visit']['success']['link_show'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Mostrar link VOLVER'),
+    '#default_value' => isset($config['schedule_visit']['success']['link_show']) ? $config['schedule_visit']['success']['link_show'] : TRUE,
+  ];
+  $form[$group]['schedule_visit']['success']['link_label'] = [
+    '#type' => 'textfield',
+    '#title' => t('Label link VOLVER cuando se agenda la visita exitosamente'),
+    '#default_value' => isset($config['schedule_visit']['success']['link_label']) ?
+      $config['schedule_visit']['success']['link_label'] : 'VER MIS VISITAS',
+  ];
+  $form[$group]['schedule_visit']['success']['link_url'] = [
+    '#type' => 'textfield',
+    '#title' => t('Url link VOLVER cuando se agenda la visita exitosamente'),
+    '#default_value' => isset($config['schedule_visit']['success']['link_url']) ? $config['schedule_visit']['success']['link_url'] : '',
+  ];
+
+  $form[$group]['schedule_visit']['success']['mail'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Plantilla de correo'),
+    '#open' => TRUE,
+    '#weight' => 0,
+    '#collapsible' => TRUE,
+  ];
+  $form[$group]['schedule_visit']['success']['mail']['subject'] = [
+    '#type' => 'textfield',
+    '#title' => t("Asunto"),
+    '#default_value' => isset($config['schedule_visit']['success']['mail']['subject']) ?
+      $config['schedule_visit']['success']['mail']['subject'] : '',
+    '#maxlength' => 128,
+  ];
+  $form[$group]['schedule_visit']['success']['mail']['body'] = [
+    '#type' => 'text_format',
+    '#title' => t('Cuerpo'),
+    '#format' => 'full_html',
+    '#default_value' => isset($config['schedule_visit']['success']['mail']['body']['value']) ?
+      $config['schedule_visit']['success']['mail']['body']['value'] : '',
+  ];
+
+  $form[$group]['schedule_visit']['failed'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion Agendamiento fallido',
+    '#group' => 'schedule_visit',
+  ];
+  $form[$group]['schedule_visit']['failed']['icon'] = [
+    '#type' => 'textfield',
+    '#title' => t('Icono cuando falle el agendamiento de la visita'),
+    '#default_value' => isset($config['schedule_visit']['failed']['icon']) ? $config['schedule_visit']['failed']['icon'] :
+      'error',
+  ];
+  $form[$group]['schedule_visit']['failed']['title'] = [
+    '#type' => 'textfield',
+    '#title' => t('Titulo cuando falle el agendamiento de la visita'),
+    '#default_value' => isset($config['schedule_visit']['failed']['title']) ? $config['schedule_visit']['failed']['title'] :
+      'No hemos podido agendar tu visita',
+  ];
+  $form[$group]['schedule_visit']['failed']['message'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando falle el agendamiento de la visita'),
+    '#default_value' => isset($config['schedule_visit']['failed']['message']) ? $config['schedule_visit']['failed']['message'] :
+      'Intentalo de nuevo pasados unos minutos',
+  ];
+  $form[$group]['schedule_visit']['failed']['link_show'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Mostrar link VOLVER'),
+    '#default_value' => isset($config['schedule_visit']['failed']['link_show']) ? $config['schedule_visit']['failed']['link_show'] : TRUE,
+  ];
+  $form[$group]['schedule_visit']['failed']['link_label'] = [
+    '#type' => 'textfield',
+    '#title' => t('Label link VOLVER cuando se agenda la visita exitosamente'),
+    '#default_value' => isset($config['schedule_visit']['failed']['link_label']) ?
+      $config['reschedule_visit']['failed']['link_label'] : 'VOLVER A MIS VISITAS',
+  ];
+  $form[$group]['schedule_visit']['failed']['link_url'] = [
+    '#type' => 'textfield',
+    '#title' => t('Url link VOLVER cuando se agenda la visita exitosamente'),
+    '#default_value' => isset($config['schedule_visit']['failed']['link_url']) ? $config['schedule_visit']['failed']['link_url'] : '',
+  ];
+
+
+  $form[$group]['schedule_visit']['failed']['message_not_found'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando falle el agendamiento error 404'),
+    '#default_value' => isset($config['schedule_visit']['failed']['message_not_found']) ?
+      $config['schedule_visit']['failed']['message_not_found'] :
+      'La cita no se pudo agendar, esta fecha ya no está disponible',
+  ];
+
+  // Reagendar visita.
+  $form[$group]['reschedule_visit'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion para Reagendar Visita',
+    '#group' => 'scheduling',
+  ];
+
+  $form[$group]['reschedule_visit']['success'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion Reagendamiento exitoso',
+    '#group' => 'reschedule_visit',
+  ];
+  $form[$group]['reschedule_visit']['success']['icon'] = [
+    '#type' => 'textfield',
+    '#title' => t('Icono cuando se reagenda la visita exitosamente'),
+    '#default_value' => isset($config['reschedule_visit']['success']['icon']) ? $config['reschedule_visit']['success']['icon'] :
+      'success',
+  ];
+  $form[$group]['reschedule_visit']['success']['title'] = [
+    '#type' => 'textfield',
+    '#title' => t('Titulo cuando se reagenda la visita exitosamente'),
+    '#default_value' => isset($config['reschedule_visit']['success']['title']) ? $config['reschedule_visit']['success']['title'] :
+      'Tu visita ha sido reagendada con exito!',
+  ];
+  $form[$group]['reschedule_visit']['success']['message'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando se reagenda la visita exitosamente'),
+    '#default_value' => isset($config['reschedule_visit']['success']['message']) ? $config['reschedule_visit']['success']['message'] :
+      'Hemos enviado un comprobante a: @email',
+  ];
+  $form[$group]['reschedule_visit']['success']['link_show'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Mostrar link VOLVER'),
+    '#default_value' => isset($config['reschedule_visit']['success']['link_show']) ? $config['reschedule_visit']['success']['link_show'] : TRUE,
+  ];
+  $form[$group]['reschedule_visit']['success']['link_label'] = [
+    '#type' => 'textfield',
+    '#title' => t('Label link VOLVER cuando se reagenda la visita exitosamente'),
+    '#default_value' => isset($config['reschedule_visit']['success']['link_label']) ?
+      $config['reschedule_visit']['success']['link_label'] : 'VER MIS VISITAS',
+  ];
+  $form[$group]['reschedule_visit']['success']['link_url']['oneapp'] = [
+    '#type' => 'textfield',
+    '#title' => t('OneApp Url link'),
+    '#default_value' => !empty($config['reschedule_visit']['success']['link_url']['oneapp']) ?
+      $config['reschedule_visit']['success']['link_url']['oneapp'] : '',
+  ];
+  $form[$group]['reschedule_visit']['success']['link_url']['selfcare'] = [
+    '#type' => 'textfield',
+    '#title' => t('SelfCare Url link'),
+    '#default_value' => !empty($config['reschedule_visit']['success']['link_url']['selfcare']) ?
+      $config['reschedule_visit']['success']['link_url']['selfcare'] : '',
+  ];
+
+  $form[$group]['reschedule_visit']['success']['mail'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Plantilla de correo'),
+    '#open' => TRUE,
+    '#weight' => 0,
+    '#collapsible' => TRUE,
+  ];
+  $form[$group]['reschedule_visit']['success']['mail']['subject'] = [
+    '#type' => 'textfield',
+    '#title' => t("Asunto"),
+    '#default_value' => isset($config['reschedule_visit']['success']['mail']['subject']) ?
+      $config['reschedule_visit']['success']['mail']['subject'] : '',
+    '#maxlength' => 128,
+  ];
+  $form[$group]['reschedule_visit']['success']['mail']['body'] = [
+    '#type' => 'text_format',
+    '#title' => t('Cuerpo'),
+    '#format' => 'full_html',
+    '#default_value' => isset($config['reschedule_visit']['success']['mail']['body']['value']) ?
+      $config['reschedule_visit']['success']['mail']['body']['value'] : '',
+  ];
+
+  $form[$group]['reschedule_visit']['failed'] = [
+    '#type' => 'details',
+    '#title' => 'Configuracion Reagendamiento fallido',
+    '#group' => 'reschedule_visit',
+  ];
+  $form[$group]['reschedule_visit']['failed']['icon'] = [
+    '#type' => 'textfield',
+    '#title' => t('Icono cuando falle el reagendamiento de la visita'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['icon']) ? $config['reschedule_visit']['failed']['icon'] :
+      'error',
+  ];
+  $form[$group]['reschedule_visit']['failed']['title'] = [
+    '#type' => 'textfield',
+    '#title' => t('Titulo cuando falle el reagendamiento de la visita'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['title']) ? $config['reschedule_visit']['failed']['title'] :
+      'No hemos podido reagendar tu visita',
+  ];
+  $form[$group]['reschedule_visit']['failed']['message'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando falle el reagendamiento de la visita'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['message']) ? $config['reschedule_visit']['failed']['message'] :
+      'Intentalo de nuevo pasados unos minutos',
+  ];
+  $form[$group]['reschedule_visit']['failed']['link_show'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Mostrar link VOLVER'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['link_show']) ? $config['reschedule_visit']['failed']['link_show'] : TRUE,
+  ];
+  $form[$group]['reschedule_visit']['failed']['link_label'] = [
+    '#type' => 'textfield',
+    '#title' => t('Label link VOLVER cuando falle el reagendamiento de la visita'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['link_label']) ?
+      $config['reschedule_visit']['failed']['link_label'] : 'VOLVER A MIS VISITAS',
+  ];
+  $form[$group]['reschedule_visit']['failed']['link_url']['oneapp'] = [
+    '#type' => 'textfield',
+    '#title' => t('OneApp Url link'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['link_url']['oneapp'])
+      ? $config['reschedule_visit']['failed']['link_url']['oneapp'] : '',
+  ];
+  $form[$group]['reschedule_visit']['failed']['link_url']['selfcare'] = [
+    '#type' => 'textfield',
+    '#title' => t('Selfcare Url link'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['link_url']['selfcare'])
+      ? $config['reschedule_visit']['failed']['link_url']['selfcare'] : '',
+  ];
+
+
+  $form[$group]['reschedule_visit']['failed']['message_not_found'] = [
+    '#type' => 'textfield',
+    '#title' => t('Mensaje cuando falle el reagendamiento error 404'),
+    '#default_value' => isset($config['reschedule_visit']['failed']['message_not_found']) ?
+      $config['reschedule_visit']['failed']['message_not_found'] :
+      'La cita no se pudo reagendar, esta fecha ya no está disponible',
+  ];
+
+  // Cancelar Visita.
+  $form[$group]['visit_location'] = [
+    '#type' => 'details',
+    '#title' => 'Location',
+    '#open' => FALSE,
+  ];
+  $form[$group]['visit_location']['apiKey'] = [
+    '#type' => 'textfield',
+    '#title' => t('API Key para JS de renderizado de mapa'),
+    '#default_value' => isset($config['visit_location']['apiKey']) ? $config['visit_location']['apiKey'] : '',
+  ];
+
+  $form['actions']['submit']['#submit'][] = 'oneapp_home_scheduling_gt_config_form_submit';
+}

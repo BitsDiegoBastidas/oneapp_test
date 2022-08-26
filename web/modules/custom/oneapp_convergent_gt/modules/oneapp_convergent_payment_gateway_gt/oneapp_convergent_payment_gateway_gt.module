@@ -1,0 +1,126 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_convergent_payment_gateway.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Form\FormStateInterface;
+
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_convergent_payment_gateway_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the payment gateway module.
+    case 'help.page.oneapp_convergent_payment_gateway':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Contains features for all oneapp convergent payment gateway GT') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function oneapp_convergent_payment_gateway_gt_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+    
+    if ($form_id == "oneapp_convergent_payment_gateway_config") {
+
+      $config = \Drupal::config('oneapp_convergent_payment_gateway.config');      
+      $group = 'user_default_payments_enrollment';
+      $subgroup = 'recurring_payments_access';
+      
+      $form[$group] = [
+        '#type' => 'details',
+        '#title' => t('Configuración de correos para Autopayments'),
+        '#open' => TRUE,
+        '#group' => 'bootstrap',
+        '#weight' => 2,
+      ];
+      $form[$group][$subgroup] = [
+        '#type' => 'details',
+        '#title' => t('Datos del usuario por defecto migracion de enrollment'),
+        '#open' => FALSE,
+        '#description' => t("Agregue el Correo electrónico y el tigo id, del usuario al que van ha quedar asociados los enrollment creados")
+      ];
+  
+      $form[$group][$subgroup]['annex_by_prefix_mail'] = [
+        '#type' => 'textfield',
+        '#title' => t("Prefijo anexo correo electrónico"),
+        '#default_value' => isset($config->get($group)[$subgroup]['annex_by_prefix_mail']) ? $config->get($group)[$subgroup]['annex_by_prefix_mail'] : '',
+      ];
+      $form[$group][$subgroup]['mail'] = [
+        '#type' => 'textfield',
+        '#title' => t("Correo electrónico"),
+        '#default_value' => isset($config->get($group)[$subgroup]['mail']) ? $config->get($group)[$subgroup]['mail'] : '',
+      ];
+      $form[$group][$subgroup]['tid'] = [
+        '#type' => 'textfield',
+        '#title' => t("ID Tigo"),
+        '#default_value' => isset($config->get($group)[$subgroup]['tid']) ? $config->get($group)[$subgroup]['tid'] : '',
+      ];
+      $form[$group][$subgroup]['status_annex_by_prefix_tid'] = [
+        '#type' => 'checkbox',
+        '#title' => t("Agregar anexo como sufijo del tigo id"),
+        '#default_value' => isset($config->get($group)[$subgroup]['status_annex_by_prefix_tid']) ? $config->get($group)[$subgroup]['status_annex_by_prefix_tid'] : 0,
+      ];
+      $form[$group][$subgroup]['annex_by_prefix_tid'] = [
+        '#type' => 'textfield',
+        '#title' => t("Prefijo anexo tigo id"),
+        '#default_value' => isset($config->get($group)[$subgroup]['annex_by_prefix_tid']) ? $config->get($group)[$subgroup]['annex_by_prefix_tid'] : '',
+        '#states' => [
+          'visible' => [
+            ':input[name="' . $group . '[' . $subgroup . '][status_annex_by_prefix_tid]"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
+  
+      $subgroup = 'email_default';
+      $form[$group][$subgroup] = [
+        '#type' => 'details',
+        '#title' => t('Correo electrónico que permite Eliminar y Editar enrollment'),
+        '#open' => FALSE,
+        '#description' => t("Correo electrónico ejemplo: (null@cybersource.com)")
+      ];
+      $form[$group][$subgroup]['mail'] = [
+        '#type' => 'textfield',
+        '#title' => t("Correo electrónico"),
+        '#default_value' => isset($config->get($group)[$subgroup]['mail']) ? $config->get($group)[$subgroup]['mail'] : '',
+      ];
+  
+      $subgroup = 'type_client';
+      $form[$group][$subgroup] = [
+        '#type' => 'details',
+        '#title' => t('Tipo de cliente'),
+        '#open' => FALSE,
+        '#description' => t("Mostrar cuando el tipo de línea es")
+      ];
+      $form[$group][$subgroup]['personal'] = [
+        '#type' => 'checkbox',
+        '#title' => t("Personal"),
+        '#default_value' => isset($config->get($group)[$subgroup]['personal']) ? $config->get($group)[$subgroup]['personal'] : FALSE,
+      ];
+      $form[$group][$subgroup]['corporative'] = [
+        '#type' => 'checkbox',
+        '#title' => t("Corporativo"),
+        '#default_value' => isset($config->get($group)[$subgroup]['corporative']) ? $config->get($group)[$subgroup]['corporative'] : FALSE,
+      ];
+
+      $form['#submit'][] = 'oneapp_convergent_payment_gateway_gt_settings_submit';
+
+    }
+}
+
+function oneapp_convergent_payment_gateway_gt_settings_submit(&$form, $form_state) {
+  \Drupal::configFactory()->getEditable('oneapp_convergent_payment_gateway.config')
+  ->set('user_default_payments_enrollment', $form_state->getValue('user_default_payments_enrollment'))
+  ->save();
+}

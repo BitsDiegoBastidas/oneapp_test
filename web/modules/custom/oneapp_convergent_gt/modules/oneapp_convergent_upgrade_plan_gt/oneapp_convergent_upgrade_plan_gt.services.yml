@@ -1,0 +1,4 @@
+services:
+  oneapp.convergent.UpgradePlanLogGtModelService:
+    class: Drupal\oneapp_convergent_upgrade_plan_gt\Services\UpgradePlanLogGtModelService
+    arguments: []

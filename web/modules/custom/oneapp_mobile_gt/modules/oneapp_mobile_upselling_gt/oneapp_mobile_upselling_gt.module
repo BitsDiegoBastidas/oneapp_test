@@ -1,0 +1,104 @@
+<?php
+
+/**
+ * @file
+ * Contains billing.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_mobile_upselling_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the upselling module.
+    case 'help.page.upselling_gt':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Contains features for all oneapp mobile upselling gt') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_block_alter().
+ */
+function oneapp_mobile_upselling_gt_block_alter(array &$definitions) {
+  // Redefine la clase del bloque
+  $definitions['oneapp_mobile_upselling_v2_0_packets_order_details_block']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\Block\v2_0\PacketsOrderDetailsGtBlock';
+
+  $definitions['oneapp_mobile_upselling_v2_0_recharge_order_details_block']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\Block\v2_0\RechargeOrderDetailsGtBlock';
+
+  // Redefine la clase del bloque BalancesBlock
+  $definitions['oneapp_mobile_upselling_v2_0_balances_block']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\Block\v2_0\BalancesGtBlock';
+    
+  $definitions['oneapp_mobile_upselling_v2_0_data_balance_detail_block']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\Block\v2_0\DataBalanceDetailGtBlock';
+    
+  $definitions['oneapp_mobile_upselling_v2_0_voice_balance_block']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\Block\v2_0\VoiceBalanceGtBlock';
+
+  $definitions['oneapp_mobile_upselling_v2_0_sms_balance_block']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\Block\v2_0\SmsBalanceGtBlock';
+
+  $definitions['oneapp_mobile_upselling_v2_0_available_offers_block']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\Block\v2_0\AvailableOffersGtBlock';
+
+}
+
+/**
+ * Implements hook_endpoint_alter().
+ */
+function oneapp_mobile_upselling_gt_endpoint_alter(array &$definitions) {
+  // Redefine la url del endpoint
+  $definitions['oneapp_mobile_upselling_v2_0_change_msisdn_endpoint']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v2/tigo/mobile/[endpoint:country_iso]/upselling/subscribers/{msisdn}/balance';
+
+  $definitions['oneapp_mobile_upselling_v2_0_available_offers_endpoint']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v1/tigo/mobile/[endpoint:country_iso]/vas/subscribers/{msisdn}/products';
+
+  $definitions['oneapp_mobile_upselling_v2_0_voice_balance_endpoint']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v2/tigo/mobile/[endpoint:country_iso]/upselling/subscribers/{msisdn}/balances';
+
+  $definitions['oneapp_mobile_upselling_v2_0_voice_balance_post_endpoint']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v2/tigo/mobile/[endpoint:country_iso]/billing/subscribers/{msisdn}/usage/summary';
+
+  $definitions['oneapp_mobile_upselling_v2_0_sms_balance_gt_postpaid']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v2/tigo/mobile/[endpoint:country_iso]/billing/subscribers/{msisdn}/usage/summary';
+
+  $definitions['oneapp_mobile_upselling_v2_0_sms_balance']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v2/tigo/mobile/[endpoint:country_iso]/upselling/subscribers/{msisdn}/balances';
+  
+    $definitions['oneapp_mobile_upselling_v2_0_acquired_offers_endpoint']['class'] =
+     'Drupal\oneapp_mobile_upselling_gt\Plugin\Endpoint\v2_0\AcquiredOffersGtEndpoint';
+
+}
+
+/**
+ * Implements hook_rest_resource_alter().
+ */
+function oneapp_mobile_upselling_gt_rest_resource_alter(&$definitions) {
+  $definitions['oneapp_mobile_upselling_v2_0_data_balance_rest_resource']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\rest\resource\v2_0\DataBalanceGtRestResource';
+
+  $definitions['oneapp_mobile_upselling_v2_0_balances_rest_resource']['class'] =
+   'Drupal\oneapp_mobile_upselling_gt\Plugin\rest\resource\v2_0\BalancesGtRestResource';
+  
+  $definitions['oneapp_mobile_upselling_v2_0_data_balance_detail_rest_resource']['class'] =
+   'Drupal\oneapp_mobile_upselling_gt\Plugin\rest\resource\v2_0\DataBalanceDetailGtRestResource';
+
+  $definitions['oneapp_mobile_upselling_v2_0_voice_balance_rest_resource']['class'] =
+  'Drupal\oneapp_mobile_upselling_gt\Plugin\rest\resource\v2_0\VoiceBalanceGtRestResource';
+
+  $definitions['oneapp_mobile_upselling_v2_0_sms_balance_rest_resource']['class'] =
+   'Drupal\oneapp_mobile_upselling_gt\Plugin\rest\resource\v2_0\SmsBalanceGtRestResource';
+
+  $definitions['oneapp_mobile_upselling_v2_0_acquired_offers_rest_resource']['class'] =
+    'Drupal\oneapp_mobile_upselling_gt\Plugin\rest\resource\v2_0\AcquiredOffersGtRestResource';
+}

@@ -1,0 +1,12 @@
+name: "OneApp GT"
+type: module
+description: "Modifies oneapp GT functionalities."
+package: "OneApp GT"
+core: 8.x
+core_version_requirement: ^8 || ^9
+version: "8.x-1.0"
+dependencies:
+  - oneapp:oneapp
+  - oneapp:oneapp_rest
+  - oneapp:oneapp_endpoints
+  - oneapp:adf_block_config

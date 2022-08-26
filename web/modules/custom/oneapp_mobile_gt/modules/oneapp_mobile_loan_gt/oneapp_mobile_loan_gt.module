@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_mobile_loan.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_mobile_loan_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the oneapp_mobile_loan module.
+    case 'help.page.oneapp_mobile_loan':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Contains features for all oneapp mobile loan') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_endpoint_alter().
+ */
+function oneapp_mobile_loan_gt_endpoint_alter(array &$definitions) {
+  // Redefine la url del endpoint para loan gt
+  $definitions['oneapp_mobile_lending_v2_0_scoring_endpoint']['defaults']['endpoint'] =
+    'https://[endpoint:environment_prefix].api.tigo.com/v1/tigo/mobile/[endpoint:country_iso]/zero_balance/subscribers/{msisdn}';
+}
+

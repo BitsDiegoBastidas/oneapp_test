@@ -1,0 +1,10 @@
+name: Oneapp Home Scheduling Gt
+type: module
+description: Oneapp Home Scheduling Gt
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: "OneApp Home"
+dependencies:
+  - oneapp:adf_block_config
+  - oneapp:oneapp_rest
+  - oneapp:oneapp_endpoints

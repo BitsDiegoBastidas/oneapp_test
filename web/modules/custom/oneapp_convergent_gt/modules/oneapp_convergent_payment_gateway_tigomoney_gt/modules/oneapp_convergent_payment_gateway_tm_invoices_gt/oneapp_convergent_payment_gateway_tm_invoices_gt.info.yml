@@ -1,0 +1,11 @@
+name: Oneapp Convergent Payment Gateway Tigomoney Invoices Gt
+type: module
+description: Modulo Oneapp Convergente Payment Gateway Tigomoney Invoices Gt con funcionalidades de pagos con tigomoney para pagos de factura con payment gateway
+package: "OneApp Convergent Gt"
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - oneapp_convergent_payment_gateway_gt
+  - oneapp_convergent_payment_gateway_tigomoney_gt
+  - oneapp_mobile_billing
+  - oneapp_home_billing

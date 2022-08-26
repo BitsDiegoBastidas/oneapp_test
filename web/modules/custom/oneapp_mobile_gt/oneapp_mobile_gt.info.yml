@@ -1,0 +1,6 @@
+name: 'ONEAPP Mobile Gt'
+type: module
+description: 'Modulo para sobreescribir algunas funcionalidades de OneApp Mobile Gt'
+package: "OneApp Mobile GT"
+core: 8.x
+core_version_requirement: ^8 || ^9

@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Contains oneapp_mobile_plans_gt.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function oneapp_mobile_plans_gt_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the oneapp_mobile_plans_gt module.
+    case 'help.page.oneapp_mobile_plans_gt':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Caracteristicas adicionales oneapp mobile plans gt') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_block_alter().
+ */
+function oneapp_mobile_plans_gt_block_alter(array &$definitions) {
+  // Redefine la clase del bloque
+  $definitions['oneapp_mobile_plans_v2_0_current_block']['class'] =
+    'Drupal\oneapp_mobile_plans_gt\Plugin\Block\v2_0\CurrentGtBlock';
+}

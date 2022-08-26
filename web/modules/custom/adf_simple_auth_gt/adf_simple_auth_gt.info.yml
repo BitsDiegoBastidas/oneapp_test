@@ -1,0 +1,8 @@
+name: 'ADF Simple Authentication GT'
+type: module
+description: 'Módulo para sobreescribir funcionalidades Adf SimpleAuth GT'
+package: 'Custom'
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  -adf_simple_auth: adf_simple_auth
